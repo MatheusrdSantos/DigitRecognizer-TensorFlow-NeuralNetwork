@@ -7,6 +7,7 @@ xold, yold = None, None
 b3 = "up"
 colors = {'draw': 'black', 'erase':'white', 'bg':'white'}
 probabilities = []
+progress_bars = []
 drawing_area = None
 var_barra = None
 #var_barra.set(10) # k é um número entre 0 e o máximo 
@@ -15,7 +16,7 @@ def main():
     global drawing_area
     root = Tk()
     drawing_area = Canvas(root, width=500, height=500, cursor='dot', bg=colors['bg'])
-    drawing_area.grid(row=0, column=0)
+    drawing_area.pack(side=LEFT)
     buildController(root)
     drawing_area.bind("<Motion>", motion)
     drawing_area.bind("<ButtonPress-1>", b1down)
@@ -28,25 +29,26 @@ def clear():
     drawing_area.create_rectangle(0,0,500,500, fill=colors['erase'], outline=colors['erase'])
 
 def buildController(root):
-    controller = Frame(root, bg="red")
+    controller = Frame(root)
     btn_1 = Button(controller, text='clear', width=20, command=lambda : clear())
     btn_2 = Button(controller, text='analyse', width=20 ,command=lambda : save_as_png(drawing_area, "image"))
-    controller.grid(column=1, row=0)
-    btn_1.pack()
-    btn_2.pack()
+    controller.pack()
+    btn_1.grid(column=0, row=0, columnspan=2)
+    btn_2.grid(column=0, row=1, columnspan=2)
+    buildProgressBars(controller)
 
 def buildProgressBars(controller):
+    label = Label(controller, text='Probabilities')
+    label.grid(column=0, row=2, columnspan=2)
     for x in range(0, 10):
-
-    var_bar0 = DoubleVar()
-    var_bar0.set(50)
-    bar = ttk.Progressbar(controller, variable=var_bar0, maximum=100)
-    bar.pack(fill=X)
-    
-    var_bar2 = DoubleVar()
-    var_bar2.set(50)
-    bar = ttk.Progressbar(controller, variable=var_bar2, maximum=100)
-    bar.pack(fill=X)
+        var_bar = DoubleVar()
+        var_bar.set(50)
+        probabilities.append(var_bar)
+        label = Label(controller, text=str(x)+': ')
+        label.grid(column=0, row=x+3)
+        bar = ttk.Progressbar(controller, variable=var_bar, maximum=100)
+        bar.grid(column=1, row=x+3)
+        progress_bars.append(bar)
     
 def save_as_png(canvas,fileName):
     # save postscipt image 

@@ -9,9 +9,6 @@ colors = {'draw': 'black', 'erase':'white', 'bg':'white'}
 probabilities = []
 progress_bars = []
 drawing_area = None
-var_barra = None
-#var_barra.set(10) # k é um número entre 0 e o máximo 
-                 # (definido como 30 no exemplo acima)
 def main():
     global drawing_area
     root = Tk()

@@ -1,6 +1,8 @@
 from tkinter import *
 from PIL import Image
 from tkinter import ttk
+import numpy as np
+import matplotlib.pyplot as plt
 
 b1 = "up"
 xold, yold = None, None
@@ -54,7 +56,15 @@ def save_as_png(canvas,fileName):
     img = Image.open(fileName + '.eps') 
     #img.resize((28,28), Image.ANTIALIAS)
     img.thumbnail((28,28), Image.ANTIALIAS)
-    img.save(fileName + '.png', 'png') 
+    img.save(fileName + '.png', 'png')
+    img_array = np.array(img)[:,:, :1]
+    img_array = img_array.reshape(28,28)
+    plt.figure()
+    plt.imshow(img_array)
+    plt.colorbar()
+    plt.grid(False)
+    plt.show()
+    #print(img_array.flatten())
 
 def b3down(event):
     global b3

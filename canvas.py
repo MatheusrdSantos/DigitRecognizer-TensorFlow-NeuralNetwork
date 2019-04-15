@@ -3,11 +3,12 @@ from PIL import Image
 from tkinter import ttk
 import numpy as np
 import matplotlib.pyplot as plt
+from utils import *
 
 b1 = "up"
 xold, yold = None, None
 b3 = "up"
-colors = {'draw': 'black', 'erase':'white', 'bg':'white'}
+colors = {'draw': 'white', 'erase':'black', 'bg':'black'}
 probabilities = []
 progress_bars = []
 drawing_area = None
@@ -15,6 +16,7 @@ def main():
     global drawing_area
     root = Tk()
     drawing_area = Canvas(root, width=500, height=500, cursor='dot', bg=colors['bg'])
+    clear()
     drawing_area.pack(side=LEFT)
     buildController(root)
     drawing_area.bind("<Motion>", motion)
@@ -25,7 +27,7 @@ def main():
     root.mainloop()
 def clear():
     global drawing_area, colors
-    drawing_area.create_rectangle(0,0,500,500, fill=colors['erase'], outline=colors['erase'])
+    drawing_area.create_rectangle(0,0,510,510, fill=colors['erase'], outline=colors['erase'])
 
 def buildController(root):
     controller = Frame(root)
@@ -41,13 +43,15 @@ def buildProgressBars(controller):
     label.grid(column=0, row=2, columnspan=2)
     for x in range(0, 10):
         var_bar = DoubleVar()
-        var_bar.set(50)
+        var_bar.set(0)
         probabilities.append(var_bar)
         label = Label(controller, text=str(x)+': ')
         label.grid(column=0, row=x+3)
-        bar = ttk.Progressbar(controller, variable=var_bar, maximum=100)
+        bar = ttk.Progressbar(controller, variable=var_bar, maximum=100, mode='determinate')
         bar.grid(column=1, row=x+3)
         progress_bars.append(bar)
+        label = Label(controller, textvariable=var_bar)
+        label.grid(column=2, row=x+3)
     
 def save_as_png(canvas,fileName):
     # save postscipt image 
@@ -59,13 +63,20 @@ def save_as_png(canvas,fileName):
     img.save(fileName + '.png', 'png')
     img_array = np.array(img)[:,:, :1]
     img_array = img_array.reshape(28,28)
-    plt.figure()
+    img_array = img_array / 255.0
+    """ plt.figure()
     plt.imshow(img_array)
     plt.colorbar()
     plt.grid(False)
-    plt.show()
-    #print(img_array.flatten())
+    plt.show() """
+    #print(img_array)
+    response = getValue(img_array.flatten())
+    response = response.clip(0)*100
+    applyValues(response)
 
+def applyValues(vector):
+    for i in range(0, 10):
+        probabilities[i].set(vector[0][i])
 def b3down(event):
     global b3
     b3 = "down"

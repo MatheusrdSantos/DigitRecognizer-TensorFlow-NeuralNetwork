@@ -3,37 +3,7 @@ from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
 from colr import color
-import random
-
-def printMnist(image_vector, dimensions=[28,28], bg=False):
-    for index, pixel in enumerate(image_vector, start=1):
-        if bg:
-            back = (pixel, pixel, pixel)
-        else:
-            back = (255-pixel, 255-pixel, 255-pixel)
-        if(index%dimensions[0]==0):
-            print(color(' ', fore=back, back=back))
-        else:
-            print(color(' ', fore=back, back=back), end="")
-def reshape_labels(labels):
-    new_labels = []
-    for y in labels:
-        new_y = [0 for x in range(0,10)]
-        new_y[y] = 1
-        new_labels.append(new_y)
-    return new_labels
-def compare_predictions(vector1, vector2):
-    if(np.argmax(vector1) == np.argmax(vector2)):
-        return True
-    return False
-
-def calc_accuracy(predictions, labels):
-    total = len(predictions)
-    count = 0
-    for i in range(0, total):
-        if(compare_predictions(predictions[i], labels[i])):
-            count+=1
-    return count/total
+from utils import *
 
 digit_mnist = keras.datasets.mnist
 
@@ -46,13 +16,8 @@ train_images = train_images / 255.0
 test_images = test_images / 255.0
 train_images = np.array([x.flatten() for x in train_images])
 test_images = np.array([x.flatten() for x in test_images])
-#printMnist(train_images[0].flatten())
 
-""" plt.figure()
-plt.imshow(train_images[0])
-plt.colorbar()
-plt.grid(False)
-plt.show() """
+
 n_neurons_1 = 128
 net = tf.InteractiveSession()
 
@@ -113,7 +78,7 @@ for e in range(epochs):
         net.run(opt, feed_dict={X: batch_x, Y: batch_y})
         
         # Show progress
-        if np.mod(i, 39) == 0:
+        if np.mod(i, 60) == 0:
             # MSE train and test
             mse_train.append(net.run(mse, feed_dict={X: train_images, Y: train_labels}))
             mse_test.append(net.run(mse, feed_dict={X: test_images, Y: test_labels}))

@@ -31,45 +31,49 @@ def clear():
 
 def buildController(root):
     controller = Frame(root)
-    btn_1 = Button(controller, text='clear', width=20, command=lambda : clear())
-    btn_2 = Button(controller, text='analyse', width=20 ,command=lambda : save_as_png(drawing_area, "image"))
+    btn_clear = Button(controller, text='clear', width=20, command=lambda : clear())
+    btn_classify = Button(controller, text='classify image', width=20 ,command=lambda : save_as_png(drawing_area, "image"))
+    btn_map = Button(controller, text='map pixels', width=20 ,command=lambda : mapImage(drawing_area, "image"))
     controller.pack()
-    btn_1.grid(column=0, row=0, columnspan=2)
-    btn_2.grid(column=0, row=1, columnspan=2)
+    btn_clear.grid(column=0, row=0, columnspan=2)
+    btn_classify.grid(column=0, row=1, columnspan=2)
+    btn_map.grid(column=0, row=2, columnspan=2)
     buildProgressBars(controller)
 
 def buildProgressBars(controller):
     label = Label(controller, text='Probabilities')
-    label.grid(column=0, row=2, columnspan=2)
+    label.grid(column=0, row=3, columnspan=2)
     for x in range(0, 10):
         var_bar = DoubleVar()
         var_bar.set(0)
         probabilities.append(var_bar)
         label = Label(controller, text=str(x)+': ')
-        label.grid(column=0, row=x+3)
+        label.grid(column=0, row=x+4)
         bar = ttk.Progressbar(controller, variable=var_bar, maximum=100, mode='determinate')
-        bar.grid(column=1, row=x+3)
+        bar.grid(column=1, row=x+4)
         progress_bars.append(bar)
-        label = Label(controller, textvariable=var_bar)
-        label.grid(column=2, row=x+3)
-    
-def save_as_png(canvas,fileName):
-    # save postscipt image 
+        label = Label(controller, textvariable=var_bar, width=20)
+        label.grid(column=2, row=x+4)
+def mapImage(canvas, fileName):
     canvas.postscript(file = fileName + '.eps') 
-    # use PIL to convert to PNG 
     img = Image.open(fileName + '.eps') 
-    #img.resize((28,28), Image.ANTIALIAS)
+    img.thumbnail((28,28), Image.ANTIALIAS)
+    img.save(fileName + '.png', 'png')
+    img_array = np.array(img)[:,:, :1]
+    img_array = img_array.reshape(28,28)
+    plt.figure()
+    plt.imshow(img_array)
+    plt.colorbar()
+    plt.grid(False)
+    plt.show()
+def save_as_png(canvas,fileName):
+    canvas.postscript(file = fileName + '.eps') 
+    img = Image.open(fileName + '.eps') 
     img.thumbnail((28,28), Image.ANTIALIAS)
     img.save(fileName + '.png', 'png')
     img_array = np.array(img)[:,:, :1]
     img_array = img_array.reshape(28,28)
     img_array = img_array / 255.0
-    """ plt.figure()
-    plt.imshow(img_array)
-    plt.colorbar()
-    plt.grid(False)
-    plt.show() """
-    #print(img_array)
     response = getValue(img_array.flatten())
     response = response.clip(0)*100
     applyValues(response)
@@ -88,13 +92,11 @@ def b3up(event):
     yold = None 
 def b1down(event):
     global b1
-    b1 = "down"           # you only want to draw when the button is down
-                          # because "Motion" events happen -all the time-
-
+    b1 = "down"
 def b1up(event):
     global b1, xold, yold
     b1 = "up"
-    xold = None           # reset the line when you let go of the button
+    xold = None
     yold = None
 
 def motion(event):

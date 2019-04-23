@@ -11,6 +11,7 @@ digit_mnist = keras.datasets.mnist
 
 train_labels = np.array(reshape_labels(train_labels))
 test_labels = np.array(reshape_labels(test_labels))
+printMnist(test_images[0].flatten())
 
 train_images = train_images / 255.0
 test_images = test_images / 255.0
@@ -41,14 +42,14 @@ bias_out = tf.Variable(bias_initializer([10]))
 #Hidden layers
 hidden_1 = tf.nn.relu(tf.add(tf.matmul(X, W_hidden_1), bias_hidden_1))
 
-# Output layer (transpose!)
-out = tf.add(tf.matmul(hidden_1, W_out), bias_out, name="out")
+# Output layer
+out = tf.nn.softmax(tf.add(tf.matmul(hidden_1, W_out), bias_out), name="out")
 
 # Cost function
-mse = tf.reduce_mean(tf.squared_difference(out, Y))
+cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(Y,out)
 
 # Optimizer
-opt = tf.train.AdamOptimizer().minimize(mse)
+opt = tf.train.AdamOptimizer().minimize(cross_entropy)
 
 # Init
 net.run(tf.global_variables_initializer())
@@ -58,8 +59,8 @@ saver = tf.train.Saver()
 
 # Fit neural net
 batch_size = 100
-mse_train = []
-mse_test = []
+cross_train = []
+cross_test = []
 
 # Run
 epochs = 10
@@ -80,18 +81,22 @@ for e in range(epochs):
         # Show progress
         if np.mod(i, 60) == 0:
             # MSE train and test
-            mse_train.append(net.run(mse, feed_dict={X: train_images, Y: train_labels}))
-            mse_test.append(net.run(mse, feed_dict={X: test_images, Y: test_labels}))
+            cross_train.append(net.run(cross_entropy, feed_dict={X: train_images, Y: train_labels}))
+            cross_test.append(net.run(cross_entropy, feed_dict={X: test_images, Y: test_labels}))
             print("Ephoc: ", e)
-            print('MSE Train: ', mse_train[-1])
-            print('MSE Test: ', mse_test[-1])
+            print('MSE Train: ', cross_train[-1])
+            print('MSE Test: ', cross_test[-1])
             predictions = net.run(out, feed_dict={X: test_images})
             print('accuracy: ', calc_accuracy(predictions, test_labels))
+            print(predictions[0])
             # Prediction
             #pred = net.run(out, feed_dict={X: test_images})
-            save_path = saver.save(net, "temp/model.ckpt")
+            #save_path = saver.save(net, "temp/model.ckpt")
+'''
 predictions = net.run(out, feed_dict={X: test_images})
 calc_accuracy(predictions, test_labels)
+print(predictions[0])
+'''
 
 
 
